@@ -31,6 +31,9 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
 OBJS = \
+    $O/emisor.o \
+    $O/generador.o \
+    $O/receptor.o \
     $O/txc1.o \
     $O/txc10.o \
     $O/txc11.o \
@@ -49,6 +52,7 @@ OBJS = \
     $O/txc7.o \
     $O/txc8.o \
     $O/txc9.o \
+    $O/txcSaW.o \
     $O/tictoc13_m.o \
     $O/tictoc14_m.o \
     $O/tictoc15_m.o \

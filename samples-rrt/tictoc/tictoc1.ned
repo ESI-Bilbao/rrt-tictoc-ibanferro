@@ -22,9 +22,14 @@ simple Txc1
 //
 network Tictoc1
 {
+    @display("bgb=524,358");
     submodules:
-        tic: Txc1;
-        toc: Txc1;
+        tic: Txc1 {
+            @display("p=166,230");
+        }
+        toc: Txc1 {
+            @display("p=320,79");
+        }
     connections:
         tic.out --> {  delay = 100ms; } --> toc.in;
         tic.in <-- {  delay = 100ms; } <-- toc.out;
