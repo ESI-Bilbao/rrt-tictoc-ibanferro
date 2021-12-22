@@ -32,6 +32,8 @@ class Emisor : public cSimpleModule
 
     cQueue *colaPaquetes; //Se almacenan los paquetes recibidos desde el Generador, que hay que enviar al Receptor
     cQueue *colaEnviando;   /// Se almacenan los paquetes que se han Enviado pero cuyo ACK aun no se ha recibido
+    double probACKLost;
+    double probNACKLost;
 
   public:
     Emisor();
@@ -70,7 +72,8 @@ void Emisor::initialize()
     colaEnviando = new cQueue("colaEnviando");
 
     EV << "Inicializando el EMISOR\n";
-
+    probACKLost = par("probACKLost").doubleValue();
+    probNACKLost = par("probNACKLost").doubleValue();
 
 }
 
@@ -94,60 +97,81 @@ void Emisor::handleMessage(cMessage *msg)
 
         if( strcmp( msg->getName() , "nack" ) == 0)
         {
-            if (uniform(0, 1) < 0.1) // Simula el caso de que el mensaje se haya perdido por el camino
+            if (uniform(0, 1) < probNACKLost )
             {
-                EV << "\"Losing\" message " << msg << endl;
+                EV << "\"Losing\" NACK message " << msg << endl;
                 bubble("NACK lost");
                 delete msg;
 
             } else{
-                EV << " NACK Received: " << msg->getName() << "\n";
 
-                // Also delete the stored message and cancel the timeout event.
-                EV << "Timer cancelled.\n";
-                cancelEvent(timeoutEvent);
-
-                sendCopyOf(packet);
-
-                cancelEvent(timeoutEvent);
-                scheduleAt(simTime()+timeout, timeoutEvent);
-
-            }
-
-        }else if( strcmp( msg->getName() , "ack" ) == 0)
-        {
-            if (uniform(0, 1) < 0.1) // Simula el caso de que el mensaje se haya perdido por el camino
-            {
-                EV << "\"Losing\" message " << msg << endl;
-                bubble("ACK lost");
-                delete msg;
-
-            } else{
-
-                EV << "Received: " << msg->getName() << "\n";
-                delete msg;
-
-                // Also delete the stored message and cancel the timeout event.
-                EV << "Timer cancelled.\n";
-                cancelEvent(timeoutEvent);
-
-                if( colaEnviando->isEmpty() == false )
+                if(check_and_cast<cPacket *>(msg)->hasBitError())
                 {
-                    EV << " Removing the Packet from colaEnviando \n";
-                    colaEnviando->remove(  check_and_cast<cObject *> (packet)  );
-                }
+                    EV << "NACK message HAS BIT ERROR";
+                    delete msg;
 
-                delete packet;
+                }else{
 
-                if( colaPaquetes->isEmpty() == false )
-                {
-                    // Ready to send another one.
-                    packet = generateNewPacket();
+                    EV << " NACK Received: " << msg->getName() << "\n";
+
+                    // Also delete the stored message and cancel the timeout event.
+                    EV << "Timer cancelled.\n";
+                    cancelEvent(timeoutEvent);
 
                     sendCopyOf(packet);
 
                     cancelEvent(timeoutEvent);
                     scheduleAt(simTime()+timeout, timeoutEvent);
+                }
+
+            }
+
+        }else if( strcmp( msg->getName() , "ack" ) == 0)
+        {
+            if ( uniform(0, 1) < probACKLost ) // Simula el caso de que el mensaje se haya perdido por el camino
+            {
+                EV << "\"Losing\" ACK message " << msg << endl;
+                bubble("ACK lost");
+                delete msg;
+
+            } else{
+
+
+
+                if(check_and_cast<cPacket *>(msg)->hasBitError())
+                {
+                    EV << "NACK message HAS BIT ERROR";
+                    delete msg;
+
+                }else{
+
+
+                    EV << "Received: " << msg->getName() << "\n";
+                    delete msg;
+
+                    // Also delete the stored message and cancel the timeout event.
+                    EV << "Timer cancelled.\n";
+                    cancelEvent(timeoutEvent);
+
+                    if( colaEnviando->isEmpty() == false )
+                    {
+                        EV << " Removing the Packet from colaEnviando \n";
+                        colaEnviando->remove(  check_and_cast<cObject *> (packet)  );
+                    }
+
+                    delete packet;
+
+                    if( colaPaquetes->isEmpty() == false )
+                    {
+                        // Ready to send another one.
+                        packet = generateNewPacket();
+
+                        sendCopyOf(packet);
+
+                        cancelEvent(timeoutEvent);
+                        scheduleAt(simTime()+timeout, timeoutEvent);
+                    }
+
                 }
 
             }

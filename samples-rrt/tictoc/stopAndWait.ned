@@ -37,6 +37,9 @@ simple Emisor
 {
     parameters:
         @display("i=block/routing");
+        
+        double probACKLost = default(0.15);   // another parameter with a default value    
+        double probNACKLost = default(0.5);   // another parameter with a default value
     gates:
         input in;
         input inGenerador;
@@ -47,6 +50,7 @@ simple Receptor
 {
     parameters:
         @display("i=block/process");
+        double probPacketLost = default(0.2);   // another parameter with a default value
     gates:
         input in;
         output out;

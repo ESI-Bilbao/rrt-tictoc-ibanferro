@@ -28,21 +28,30 @@ class Receptor : public cSimpleModule
   private:
     cPacket *nack_packet;   //Paquete que se envia para mandar un NACK
     cPacket *ack_packet;    //Paquete que se envia para mandar un ACK
+    double probPacketLost;
 
   protected:
+    virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 };
 
 Define_Module(Receptor);
 
+void Receptor::initialize()
+{
+
+    probPacketLost = par("probPacketLost").doubleValue();
+
+}
+
 void Receptor::handleMessage(cMessage *msg)
 {
     cPacket *pkt=check_and_cast<cPacket *>(msg);
 
-    if (uniform(0, 1) < 0.1) // Simula el caso de que el mensaje se haya perdido por el camino
+    if (uniform(0, 1) < probPacketLost ) // Simula el caso de que el mensaje se haya perdido por el camino
     {
         EV << "\"Losing\" message " << msg << endl;
-        bubble("message lost");
+        bubble("Packet lost in Channel");
         delete msg;
     }
     else { // Simula el caso en el que el mensaje ha llegado a su destino
@@ -50,7 +59,7 @@ void Receptor::handleMessage(cMessage *msg)
         EV << "RECEPTOR\n";
         EV << "En el RECEPTOR se ha RECIBIDO el PAQUETE "+std::to_string(pkt->getBitLength())+"\n";
 
-        if (pkt[0].hasBitError()) //Comprueba si el ,ensaje que ha llegado tiene bits ERRONEOS
+        if (pkt->hasBitError()) //Comprueba si el ,ensaje que ha llegado tiene bits ERRONEOS
         {
             EV << msg << " received with ERROR, sending back an NACK message.\n";
             delete msg;
