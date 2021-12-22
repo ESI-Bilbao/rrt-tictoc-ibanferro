@@ -109,7 +109,7 @@ cPacket *Generador::generateNewPacket()
     // Generate a message with a different name every time.
 
     char pktname[20];
-    sprintf(pktname, "tic-%d", ++seq);
+    sprintf(pktname, "tic-%d-GEN", ++seq);
     cPacket *pkt = new cPacket(pktname,0,960);
 
     return pkt;
