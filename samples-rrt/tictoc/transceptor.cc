@@ -36,6 +36,8 @@ class Transceptor : public cSimpleModule
     cPacket *nack_packet;   //Paquete que se envia para mandar un NACK
     cPacket *ack_packet;    //Paquete que se envia para mandar un ACK
 
+    char pktname[20];
+
     double probACKLost;
     double probNACKLost;
     double probPacketLost;
@@ -188,9 +190,16 @@ void Transceptor::handleMessage(cMessage *msg)
             }
 
         }else{
-            if( check_and_cast<cPacket *>(msg)->getName().find("GEN") != string::npos )
+
+            EV << msg->getName();
+
+            if( strncmp( msg->getName() , "GEN" ,3 ) == 0)
             {
-                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor\n";
+                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
+
+
+                sprintf(pktname, "tic-%d", ++seq);
+                msg->setName( pktname );
 
                 cPacket *pkt = check_and_cast<cPacket *>( msg );
 
@@ -209,6 +218,9 @@ void Transceptor::handleMessage(cMessage *msg)
 
                 }
             }else{
+
+
+
 
                 cPacket *pktRec=check_and_cast<cPacket *>(msg);
 

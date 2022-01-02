@@ -33,28 +33,57 @@ simple Generador
         output out;
 }
 
-simple Emisor
+simple Transceptor
 {
     parameters:
         @display("i=block/routing");
         
         double probACKLost = default(0.15);   // another parameter with a default value    
         double probNACKLost = default(0.5);   // another parameter with a default value
+        
+        double probPacketLost = default(0.5);   // another parameter with a default value
     gates:
-        input in;
-        input inGenerador;
+        input in[];
         output out;
+        output outFinal;
 }
 
-simple Receptor
+module ProtocolLink
 {
-    parameters:
-        @display("i=block/process");
-        double probPacketLost = default(0.2);   // another parameter with a default value
-    gates:
-        input in;
-        output out;
+ 	gates:
+
+ 	    input inPacket1;
+ 	    output outPacket1;
+ 	    
+ 	    input inPacket2;
+ 	    output outPacket2;
+ 	    
+ 
+    submodules:
+        
+        transceptorEmisor: Transceptor {
+            parameters:
+                @display("i=,cyan;p=152.8,60.48");
+        }
+        transceptorReceptor: Transceptor {
+            parameters:
+                @display("i=,gold;p=352.8,60.48");
+        }
+    connections:
+
+        inPacket1 --> transceptorEmisor.in++;
+        inPacket2 --> transceptorReceptor.in++;
+        
+        transceptorEmisor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorReceptor.in++;
+        transceptorReceptor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorEmisor.in++;
+        
+        
+        transceptorReceptor.outFinal --> outPacket1;
+        transceptorEmisor.outFinal --> outPacket2;
+           
 }
+
+
 
 //
 // Same as Tictoc8.
@@ -62,21 +91,20 @@ simple Receptor
 network myNetStopAndWait
 {
     @display("bgb=318.08002,108.64");
+    
     submodules:
-        generador: Generador {
-            parameters:
-                @display("i=,gold;p=22.8,60.48");
-        }
-        emisor: Emisor {
-            parameters:
-                @display("i=,cyan;p=152.8,60.48");
-        }
-        receptor: Receptor {
-            parameters:
-                @display("i=,gold;p=269.36002,60.48");
-        }
-    connections:
-        generador.out --> emisor.inGenerador;
-        receptor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> emisor.in;
-        emisor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> receptor.in;
+        
+    generador: Generador {
+    	parameters:
+        	@display("i=,gold;p=22.8,60.48");
+    }
+        
+    protocolLink: ProtocolLink {
+    	parameters:
+        	@display("i=,gold;p=269.36002,60.48");
+    }
+         
+    connections allowunconnected:
+        generador.out --> protocolLink.inPacket1;
+        
 }
