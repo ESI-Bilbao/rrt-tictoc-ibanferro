@@ -43,9 +43,69 @@ simple Transceptor
         
         double probPacketLost = default(0.5);   // another parameter with a default value
     gates:
-        input in[];
+        input inPacket;
+        input in;
         output out;
         output outFinal;
+}
+
+simple Repartidor
+{
+ 
+ 	parameters:
+    	int maxPuertas = default(3);
+    	
+        int maxInterfaces = default(3);
+        string probs_arriba_str = default("1,3");
+        string probs_abajo_str = default("4,4");
+        string destinos_str = default("1,2");
+    gates:
+        input in[3];
+        output out[3];
+        input inPacket;
+     
+}
+
+simple Retransmisor
+{
+     parameters:
+        @display("i=block/routing");
+
+    gates:
+        input in1;
+        output out1; //Al de otro conmutador
+        input in2;
+        output out2;//Al de conmutador propio
+}
+
+module Conmutador
+{
+
+    	
+    gates:
+		input in[3];
+		output out[3]; 
+		input inPacket;
+    submodules:
+        repartidor: Repartidor{
+            
+        }
+        retransmisor[3]: Retransmisor;
+    connections allowunconnected:
+        
+        in[1] --> retransmisor[1].in2;
+        in[2] --> retransmisor[0].in2;
+        
+        retransmisor[1].out2 --> repartidor.in[1];
+        retransmisor[0].out2 --> repartidor.in[2];
+        
+        repartidor.out[1] --> retransmisor[1].in1;
+        repartidor.out[2] --> retransmisor[0].in1;
+     
+     	retransmisor[1].out1 --> out[1];
+     	retransmisor[0].out1 --> out[2];
+     	
+     	inPacket --> repartidor.inPacket;
 }
 
 module ProtocolLink
@@ -71,11 +131,11 @@ module ProtocolLink
         }
     connections:
 
-        inPacket1 --> transceptorEmisor.in++;
-        inPacket2 --> transceptorReceptor.in++;
+        inPacket1 --> transceptorEmisor.inPacket;
+        inPacket2 --> transceptorReceptor.inPacket;
         
-        transceptorEmisor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorReceptor.in++;
-        transceptorReceptor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorEmisor.in++;
+        transceptorEmisor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorReceptor.in;
+        transceptorReceptor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorEmisor.in;
         
         
         transceptorReceptor.outFinal --> outPacket1;
@@ -90,21 +150,99 @@ module ProtocolLink
 //
 network myNetStopAndWait
 {
-    @display("bgb=318.08002,108.64");
+	
+    @display("bgb=338.08002,288.64");
     
-    submodules:
         
+    submodules:
     generador: Generador {
     	parameters:
         	@display("i=,gold;p=22.8,60.48");
+        	
     }
-        
-    protocolLink: ProtocolLink {
+           
+    conmutador1: Conmutador {
     	parameters:
-        	@display("i=,gold;p=269.36002,60.48");
+            @display("i=,gold;p=22.8,160.48");
+            repartidor.probs_arriba_str = default("1,3");
+            repartidor.probs_abajo_str = default("4,4");
+            repartidor.destinos_str = default("1,2");
+        	
+    }
+    
+    conmutador2: Conmutador {
+    	parameters:
+        	@display("i=,gold;p=222.8,60.48");
+            repartidor.probs_arriba_str = default("1,2");
+            repartidor.probs_abajo_str = default("3,3");
+            repartidor.destinos_str = default("1,2");
+    }
+    
+    
+    conmutador3: Conmutador {
+    	parameters:
+        	@display("i=,gold;p=422.8,60.48");
+            repartidor.probs_arriba_str = default("1,1");
+            repartidor.probs_abajo_str = default("2,2");
+            repartidor.destinos_str = default("1,2");
+    }
+                    
+                    
+    conmutador4: Conmutador {
+    	parameters:
+        	@display("i=,gold;p=422.8,260.48");
+        
+    }
+            
+    
+    conmutador5: Conmutador {
+    	parameters:
+        	@display("i=,gold;p=222.8,260.48");
+            repartidor.probs_arriba_str = default("1,1");
+            repartidor.probs_abajo_str = default("2,2");
+            repartidor.destinos_str = default("1,2");
+    }
+            
+     
+    protocolLink1[2]: ProtocolLink {
+    	parameters:
+        	@display("i=,cyan");
+        
+    }
+    
+    
+    protocolLink2[2]: ProtocolLink {
+    	parameters:
+        	@display("i=,cyan");
+    }
+    
+    protocolLink5[2]: ProtocolLink {
+    	parameters:
+        	@display("i=,cyan");
     }
          
+
+        
     connections allowunconnected:
-        generador.out --> protocolLink.inPacket1;
+        generador.out --> conmutador1.inPacket;
+        
+        conmutador1.out[1] --> protocolLink1[0].inPacket1;
+        conmutador1.out[2] --> protocolLink1[1].inPacket1;
+        
+		protocolLink1[0].outPacket1 --> conmutador2.in[1];
+		protocolLink1[1].outPacket1 --> conmutador5.in[1];
+
+        conmutador2.out[1] --> protocolLink2[0].inPacket1;
+        conmutador2.out[2] --> protocolLink2[1].inPacket1;
+        
+		protocolLink2[0].outPacket1 --> conmutador3.in[1];
+		protocolLink2[1].outPacket1 --> conmutador4.in[1];
+
+        conmutador5.out[1] --> protocolLink5[0].inPacket1;
+        conmutador5.out[2] --> protocolLink5[1].inPacket1;
+        
+        
+		protocolLink5[0].outPacket1 --> conmutador2.in[2];
+		protocolLink5[1].outPacket1 --> conmutador4.in[2];
         
 }

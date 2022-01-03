@@ -193,13 +193,17 @@ void Transceptor::handleMessage(cMessage *msg)
 
             EV << msg->getName();
 
-            if( strncmp( msg->getName() , "GEN" ,3 ) == 0)
+            cGate* arrivalGate = msg->getArrivalGate();
+
+            //if( strncmp( msg->getName() , "GEN" ,3 ) == 0)
+            if( arrivalGate == gate("inPacket") )
             {
                 EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
 
-
+                /*
                 sprintf(pktname, "tic-%d", ++seq);
                 msg->setName( pktname );
+                */
 
                 cPacket *pkt = check_and_cast<cPacket *>( msg );
 
@@ -218,7 +222,6 @@ void Transceptor::handleMessage(cMessage *msg)
 
                 }
             }else{
-
 
 
 
@@ -246,16 +249,18 @@ void Transceptor::handleMessage(cMessage *msg)
                     }
                     else{   // Simula el caso en que el mensaje ha llegado y NO tiene ERRORES
                         EV << msg << " received, sending back an ACK.\n";
-                        delete msg;
+                        send( msg, "outFinal"); //Se envia un ACK
+
 
                         ack_packet = new cPacket("ack");
                         ack_packet->setBitLength(48); //Los Bits de un mensaje NACK/ACK
                         send( ack_packet, "out"); //Se envia un ACK
 
+                        //delete msg;
                     }
                 }
 
-            }
+           }
 
         }
     }

@@ -34,6 +34,8 @@ OBJS = \
     $O/emisor.o \
     $O/generador.o \
     $O/receptor.o \
+    $O/repartidor.o \
+    $O/retransmisor.o \
     $O/transceptor.o \
     $O/txc1.o \
     $O/txc10.o \
