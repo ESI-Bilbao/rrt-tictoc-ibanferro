@@ -1,0 +1,149 @@
+file 130021 1641304171                                          
+version 2
+run General-0-20220104-13:45:17-3409
+attr configname General
+attr datetime 20220104-13:45:17
+attr experiment General
+attr inifile myNetStopAndWait.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network myNetStopAndWait
+attr processid 3409
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 0 myNetStopAndWait.conmutador1.repartidor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 1 myNetStopAndWait.conmutador1.repartidor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 2 myNetStopAndWait.protocolLink1[1].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 3 myNetStopAndWait.protocolLink1[1].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 4 myNetStopAndWait.conmutador5.repartidor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 5 myNetStopAndWait.conmutador5.repartidor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 6 myNetStopAndWait.protocolLink5[1].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 7 myNetStopAndWait.protocolLink5[1].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 8 myNetStopAndWait.protocolLink1[1].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 9 myNetStopAndWait.conmutador2.repartidor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 10 myNetStopAndWait.conmutador2.repartidor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 11 myNetStopAndWait.protocolLink2[1].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 12 myNetStopAndWait.protocolLink2[1].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 13 myNetStopAndWait.conmutador4.repartidor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 14 myNetStopAndWait.protocolLink2[1].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 15 myNetStopAndWait.protocolLink2[0].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 16 myNetStopAndWait.protocolLink2[0].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 17 myNetStopAndWait.protocolLink5[1].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 18 myNetStopAndWait.protocolLink5[0].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 19 myNetStopAndWait.protocolLink5[0].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 20 myNetStopAndWait.protocolLink5[0].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 21 myNetStopAndWait.conmutador3.repartidor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 22 myNetStopAndWait.protocolLink2[0].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+vector 23 myNetStopAndWait.protocolLink1[0].transceptorEmisor numRcvd:vector ETV
+attr interpolationmode none
+attr source rcvdSignal
+attr title "num received, vector"
+vector 24 myNetStopAndWait.protocolLink1[0].transceptorEmisor bufferLength:vector ETV
+attr interpolationmode none
+attr source bufferSignal
+attr title "num received, vector"
+vector 25 myNetStopAndWait.protocolLink1[0].transceptorEmisor numSent:vector ETV
+attr interpolationmode none
+attr source sentSignal
+attr title "num sent, vector"
+0	4586 6261 2 6322 0.449280202389 114.219675192146 238 1 238 28441 4522119
+1	10847 6261 2 6322 0.449280202389 114.219675192146 238 1 238 28441 4522119
+2	17108 4560 4 6324 0.449280202389 114.219675192146 175 1 175 15400 1801800
+3	21668 6299 4 6324 0.449280202389 114.219675192146 246 0 104 12501 880923
+4	27967 8698 7 6342 0.449414535722 114.399285235644 329 1 329 54285 11924605
+5	36665 8698 7 6342 0.449414535722 114.399285235644 329 1 329 54285 11924605
+6	45363 5495 9 6344 0.449414535722 114.399285235644 209 1 209 21945 3064985
+7	50858 6951 9 6344 0.449414535722 114.399285235644 269 0 149 18065 1700391
+8	57809 1795 10 6277 0.449430535722 113.399144235644 70 1 70 2485 116795
+9	59604 9911 13 6314 0.929802119732 113.964214231359 374 1 374 70125 17507875
+10	69515 10285 13 6314 0.929802119732 113.964214231359 374 1 374 70125 17507875
+11	79800 5946 15 6316 0.929802119732 113.964214231359 218 1 218 23871 3477209
+12	85746 7520 15 6316 0.929802119732 113.964214231359 277 0 159 23315 2598163
+13	93266 3999 18 6128 0.929884453065 110.551275706503 148 1 148 11026 1091574
+14	97265 1549 19 6129 0.929900453065 110.551291706503 58 1 58 1711 66729
+15	98814 4232 27 6235 1.254525303841 112.605154476365 156 1 156 12246 1277666
+16	103046 5895 27 6337 1.254525303841 114.267994303842 221 0 97 10443 720939
+17	108941 1559 38 5809 1.449564869055 105.400075568978 59 1 59 1770 70210
+18	110500 3216 60 6320 2.27489978075 114.190626233657 120 1 120 7260 583220
+19	113716 4604 60 6320 2.27489978075 114.190626233657 173 0 67 6575 307931
+20	118320 1388 66 6143 2.275007114083 110.605109476365 52 1 52 1378 48230
+21	119708 2066 185 6336 5.254537637174 114.267978303842 77 1 77 3003 155155
+22	121774 1717 186 6337 5.254553637174 114.267994303842 64 1 64 2080 89440
+23	123491 1692 218 6176 5.689267368056 111.218053468971 63 1 63 2016 85344
+24	125183 3277 218 6176 5.689267368056 111.218053468971 126 0 5 187 487
+25	128460 1560 224 6182 5.689584701389 111.218108468971 58 1 58 1711 66729
+

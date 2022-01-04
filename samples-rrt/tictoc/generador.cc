@@ -35,7 +35,7 @@ class Generador : public cSimpleModule
 
     int lonMedia = 512;
     //float timeMedia = 0.5;
-    float lambda = 5.0;
+    double lambda;
 
   public:
     Generador();
@@ -71,6 +71,8 @@ void Generador::initialize()
 
     longExponential = new cExponential();
     timeExponential = new cExponential();
+
+    lambda = par("lambda").doubleValue();
 
     cPacket *packet = generateNewPacket();
 

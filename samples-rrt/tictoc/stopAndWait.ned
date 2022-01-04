@@ -29,6 +29,7 @@ simple Generador
 {
     parameters:
         @display("i=block/process");
+        double lambda = default(2);
     gates:
         output out;
 }
@@ -42,6 +43,16 @@ simple Transceptor
         double probNACKLost = default(0.5);   // another parameter with a default value
         
         double probPacketLost = default(0.5);   // another parameter with a default value
+        
+        @signal[sentSignal](type="long");
+        @statistic[numSent](title="num sent"; source="sentSignal"; record=vector,stats; interpolationmode=none);
+        
+        @signal[rcvdSignal](type="long");
+        @statistic[numRcvd](title="num received"; source="rcvdSignal"; record=vector,stats; interpolationmode=none);
+        
+        @signal[bufferSignal](type="long");
+        @statistic[bufferLength](title="num received"; source="bufferSignal"; record=vector,stats; interpolationmode=none);
+        
     gates:
         input inPacket;
         input in;
@@ -59,6 +70,13 @@ simple Repartidor
         string probs_arriba_str = default("1,3");
         string probs_abajo_str = default("4,4");
         string destinos_str = default("1,2");
+        
+        @signal[sentSignal](type="long");
+        @statistic[numSent](title="num sent"; source="sentSignal"; record=vector,stats; interpolationmode=none);
+        
+        @signal[rcvdSignal](type="long");
+        @statistic[numRcvd](title="num received"; source="rcvdSignal"; record=vector,stats; interpolationmode=none);
+        
     gates:
         input in[3];
         output out[3];
@@ -134,8 +152,8 @@ module ProtocolLink
         inPacket1 --> transceptorEmisor.inPacket;
         inPacket2 --> transceptorReceptor.inPacket;
         
-        transceptorEmisor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorReceptor.in;
-        transceptorReceptor.out --> DatarateChannel {  delay = default(0.1s); datarate = default(9600000bps); per = default(0.1); } --> transceptorEmisor.in;
+        transceptorEmisor.out --> DatarateChannel {  datarate = default( 3000000bps); per = default(0.1); } --> transceptorReceptor.in;
+        transceptorReceptor.out --> DatarateChannel {  datarate = default( 3000000bps); per = default(0.1); } --> transceptorEmisor.in;
         
         
         transceptorReceptor.outFinal --> outPacket1;
@@ -150,17 +168,26 @@ module ProtocolLink
 //
 network myNetStopAndWait
 {
-	
+
     @display("bgb=338.08002,288.64");
-    
-        
+
     submodules:
-    generador: Generador {
+    generador1: Generador {
     	parameters:
         	@display("i=,gold;p=22.8,60.48");
         	
     }
-           
+    generador2: Generador {
+    	parameters:
+        	@display("i=,gold;p=92.8,40.48");
+        	
+    }
+    generador3: Generador {
+    	parameters:
+        	@display("i=,gold;p=62.8,260.48");
+        	
+    }
+
     conmutador1: Conmutador {
     	parameters:
             @display("i=,gold;p=22.8,160.48");
@@ -169,7 +196,7 @@ network myNetStopAndWait
             repartidor.destinos_str = default("1,2");
         	
     }
-    
+
     conmutador2: Conmutador {
     	parameters:
         	@display("i=,gold;p=222.8,60.48");
@@ -177,8 +204,7 @@ network myNetStopAndWait
             repartidor.probs_abajo_str = default("3,3");
             repartidor.destinos_str = default("1,2");
     }
-    
-    
+
     conmutador3: Conmutador {
     	parameters:
         	@display("i=,gold;p=422.8,60.48");
@@ -186,15 +212,13 @@ network myNetStopAndWait
             repartidor.probs_abajo_str = default("2,2");
             repartidor.destinos_str = default("1,2");
     }
-                    
-                    
+
     conmutador4: Conmutador {
     	parameters:
         	@display("i=,gold;p=422.8,260.48");
         
     }
-            
-    
+
     conmutador5: Conmutador {
     	parameters:
         	@display("i=,gold;p=222.8,260.48");
@@ -202,29 +226,27 @@ network myNetStopAndWait
             repartidor.probs_abajo_str = default("2,2");
             repartidor.destinos_str = default("1,2");
     }
-            
-     
+
     protocolLink1[2]: ProtocolLink {
     	parameters:
         	@display("i=,cyan");
         
     }
-    
-    
+
     protocolLink2[2]: ProtocolLink {
     	parameters:
         	@display("i=,cyan");
     }
-    
+
     protocolLink5[2]: ProtocolLink {
     	parameters:
         	@display("i=,cyan");
     }
-         
 
-        
     connections allowunconnected:
-        generador.out --> conmutador1.inPacket;
+        generador1.out --> conmutador1.inPacket;
+        generador2.out --> conmutador2.inPacket;
+        generador3.out --> conmutador5.inPacket;
         
         conmutador1.out[1] --> protocolLink1[0].inPacket1;
         conmutador1.out[2] --> protocolLink1[1].inPacket1;
@@ -240,7 +262,6 @@ network myNetStopAndWait
 
         conmutador5.out[1] --> protocolLink5[0].inPacket1;
         conmutador5.out[2] --> protocolLink5[1].inPacket1;
-        
         
 		protocolLink5[0].outPacket1 --> conmutador2.in[2];
 		protocolLink5[1].outPacket1 --> conmutador4.in[2];

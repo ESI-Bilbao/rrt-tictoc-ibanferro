@@ -16,6 +16,8 @@
 #include <string>
 #include <sstream>
 
+#include "tictoc16_m.h"
+
 
 using namespace omnetpp;
 using namespace std;
@@ -42,6 +44,13 @@ class Repartidor : public cSimpleModule
     int destinos_num[2];
 
     float probs[2];
+
+
+    simsignal_t sentSignal;
+    simsignal_t rcvdSignal;
+
+    long numSent;
+    long numRcvd;
 
   protected:
     virtual void initialize() override;
@@ -94,11 +103,44 @@ void Repartidor::initialize()
     EV << "PROBABILIDADES SIZE LENGTH "<< sizeof(probs)/sizeof(int) <<"\n";
 
 
+    sentSignal = registerSignal("sentSignal");
+    rcvdSignal = registerSignal("rcvdSignal");
+
+    numSent = 0;
+    numRcvd = 0;
+
+
 }
 
 void Repartidor::handleMessage(cMessage *msg)
 {
     cPacket *pkt=check_and_cast<cPacket *>(msg);
+
+
+
+
+/*
+
+    TicTocMsg16 *ttmsg = check_and_cast<TicTocMsg16 *>(msg);
+
+
+    if (ttmsg->getDestination() == getIndex()) {
+        // Message arrived
+        int hopcount = ttmsg->getHopCount();
+        // send a signal
+        emit(sentSignal, hopcount);
+
+        EV << "Message " << ttmsg << " arrived after " << hopcount << " hops.\n";
+
+    }
+
+*/
+        numRcvd++;
+        EV << "Aumentamos numero de mensajes Recibidos"<< numRcvd <<"\n";
+
+        // receive a signal
+        emit(rcvdSignal, numRcvd);
+
 
 
         EV << "Repartidor\n";
@@ -107,21 +149,46 @@ void Repartidor::handleMessage(cMessage *msg)
 
         EV << "El valor de probs_arriba_num es "<< probs_abajo_num[0]<<"\n";
 
-        if( strncmp( pkt->getName() , "GEN" ,3 ) == 0)
+        if(strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador4") == 0 ||  strcmp( pkt->getSenderModule()->getParentModule()->getName() , "conmutador3") == 0  )
         {
-            EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
 
-            sprintf(pktname, "tic-%d", ++seq);
-            pkt->setName( pktname );
+            EV << "Este SI es el Conmutador 4\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador4");
+            EV << "Este SI es el Conmutador 3\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador3");
+
+            EV << pkt->getSenderModule()->getParentModule()->getName() << "\n";
+            EV << "El anterior print deberia ser el nombre del modulo \n";
+
+            //delete pkt;
+
+            delete msg;
 
 
         }else{
 
-            EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde otro Conmutador\n";
+            EV << "Este NO es el Conmutador 4\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador4");
+            EV << "Este NO es el Conmutador 3\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador3");
+
+            EV << pkt->getSenderModule()->getParentModule()->getName() << "\n";
+            EV << "El anterior print deberia ser el nombre del modulo \n";
+        //}
+
+            if( strncmp( pkt->getName() , "GEN" ,3 ) == 0)
+            {
+                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
+
+                sprintf(pktname, "tic-%d", ++seq);
+                pkt->setName( pktname );
+
+
+            }else{
+
+                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde otro Conmutador\n";
+
+            }
+
+            sendCopyOf(pkt);
 
         }
-
-        sendCopyOf(pkt);
 
 }
 
@@ -179,7 +246,15 @@ void Repartidor::sendCopyOf(cPacket *pkt)
 
         }
 
+        numSent++;
+        EV << "AUmentamos numero de mensajes enviados"<< numSent <<"\n";
+
+        // send a signal
+        emit(sentSignal, numSent);
+
+
         EV << "Forwarding message " << msg << " on port out[" << puertaOut << "]\n";
+        EV << "PROBABILIDAD DE ESTA OPCION de PUERTA OUT " << probs[puertaOut -1] << "\n";
         send(msg, "out", puertaOut);
     }else{
         EV << "The output gates vector is 0 or -1";

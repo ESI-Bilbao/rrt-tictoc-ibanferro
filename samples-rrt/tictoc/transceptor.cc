@@ -42,6 +42,17 @@ class Transceptor : public cSimpleModule
     double probNACKLost;
     double probPacketLost;
 
+
+    simsignal_t sentSignal;
+    simsignal_t rcvdSignal;
+
+    simsignal_t bufferSignal;
+
+    long numSent;
+    long numRcvd;
+
+    long bufferLength;
+
   public:
     Transceptor();
     virtual ~Transceptor();
@@ -76,7 +87,6 @@ void Transceptor::initialize()
     timeout = 1.0;
     timeoutEvent = new cMessage("timeoutEvent");
 
-
     colaPaquetes = new cQueue("colaPaquetes");
     colaEnviando = new cQueue("colaEnviando");
 
@@ -87,6 +97,14 @@ void Transceptor::initialize()
     //RECEPTOR
 
     probPacketLost = par("probPacketLost").doubleValue();
+
+    sentSignal = registerSignal("sentSignal");
+    rcvdSignal = registerSignal("rcvdSignal");
+    bufferSignal = registerSignal("bufferSignal");
+
+    numSent = 0;
+    numRcvd = 0;
+    bufferLength = 0;
 
 }
 
@@ -159,6 +177,13 @@ void Transceptor::handleMessage(cMessage *msg)
                 }else{
 
 
+                    numSent++;
+                    EV << "AUmentamos numero de mensajes enviados"<< numSent <<"\n";
+
+                    // send a signal
+                    emit(sentSignal, numSent);
+
+
                     EV << "Received: " << msg->getName() << "\n";
                     delete msg;
 
@@ -204,11 +229,26 @@ void Transceptor::handleMessage(cMessage *msg)
                 sprintf(pktname, "tic-%d", ++seq);
                 msg->setName( pktname );
                 */
+                numRcvd++;
+                EV << "Aumentamos numero de mensajes Recibidos"<< numRcvd <<"\n";
+
+                // receive a signal
+                emit(rcvdSignal, numRcvd);
 
                 cPacket *pkt = check_and_cast<cPacket *>( msg );
 
                 colaPaquetes->insert( check_and_cast<cObject *> (pkt) );
                 EV << "Paquete insertado en la cola colaPaquetes\n";
+
+
+                bufferLength = (long)colaPaquetes->getLength();
+                //bufferLength++;
+                EV << "Aumentamos Longitud de la COLA DE PAQUETES"<< bufferLength <<"\n";
+
+                // receive a signal
+                emit(bufferSignal, bufferLength);
+
+
 
                 if(colaPaquetes->getLength() == 1 && colaEnviando->isEmpty() )
                 {
@@ -280,6 +320,14 @@ cPacket *Transceptor::generateNewPacket()
     EV << "Vamos a REMOVER pkt de colaPaquetes\n";
 
     colaPaquetes->remove( check_and_cast<cObject *> (pkt) );
+
+
+    bufferLength = (long)colaPaquetes->getLength();
+    //bufferLength--;
+    EV << "Reducimos Longitud de la COLA DE PAQUETES"<< bufferLength <<"\n";
+
+    // receive a signal
+    emit(bufferSignal, bufferLength);
 
     /*
     char pktname[20];
