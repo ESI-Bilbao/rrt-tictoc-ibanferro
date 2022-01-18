@@ -52,6 +52,11 @@ class Repartidor : public cSimpleModule
     long numSent;
     long numRcvd;
 
+
+    long porPuertaUno;
+    long porPuertaDos;
+
+
   protected:
     virtual void initialize() override;
     virtual void sendCopyOf(cPacket *pkt);
@@ -109,15 +114,14 @@ void Repartidor::initialize()
     numSent = 0;
     numRcvd = 0;
 
+    porPuertaUno = 0;
+    porPuertaDos = 0;
 
 }
 
 void Repartidor::handleMessage(cMessage *msg)
 {
     cPacket *pkt=check_and_cast<cPacket *>(msg);
-
-
-
 
 /*
 
@@ -204,14 +208,25 @@ void Repartidor::sendCopyOf(cPacket *pkt)
     float probFloat = (float) probs[0];
     float sumatorioProbs;
 
+    EV << "El PROBFLOAT de este conmutador es valor 0 "<< probs[0] <<" y el valor 1 es " << probs[1] << "\n";
+    EV <<  "";
+
     if(numeroAleatorio < probFloat)
     {
         puertaOut = destinos_num[0];
+
+        porPuertaUno++;
+
     }else{
 
         puertaOut = destinos_num[1];
+        porPuertaDos++;
 
     }
+
+    EV <<  "\n"<< pkt->getArrivalModule()->getParentModule()->getName() <<"AAA\n";
+    EV <<  "\n"<< pkt->getArrivalModule()->getParentModule()->getId()<<"AAA\n";
+    EV << "PUERTAUNO "<< porPuertaUno << " PUERTADOS "<< porPuertaDos << endl;
 
     EV << "PUERTA OUT " << puertaOut << "\n";
 
@@ -228,7 +243,7 @@ void Repartidor::sendCopyOf(cPacket *pkt)
         {
             EV << "Error in the ARRIVAL GATE INDEX\n";
         }
-
+        /*
         while(puertaOut == arrivalGateIndex)
         {
             numeroAleatorio = uniform(0, 1);
@@ -245,6 +260,7 @@ void Repartidor::sendCopyOf(cPacket *pkt)
             EV << "PUERTA OUT " << puertaOut << "\n";
 
         }
+        */
 
         numSent++;
         EV << "AUmentamos numero de mensajes enviados"<< numSent <<"\n";

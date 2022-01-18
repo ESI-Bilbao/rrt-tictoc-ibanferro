@@ -15,6 +15,7 @@
 
 
 using namespace omnetpp;
+using namespace std;
 
 /**
  * In the previous model we just created another packet if we needed to
@@ -32,11 +33,15 @@ class Transceptor : public cSimpleModule
 
     cQueue *colaPaquetes; //Se almacenan los paquetes recibidos desde el Generador, que hay que enviar al Receptor
     cQueue *colaEnviando;   /// Se almacenan los paquetes que se han Enviado pero cuyo ACK aun no se ha recibido
+    cQueue *timePaquetes;
 
     cPacket *nack_packet;   //Paquete que se envia para mandar un NACK
     cPacket *ack_packet;    //Paquete que se envia para mandar un ACK
 
+    cPacket *time_packet;
+
     char pktname[20];
+    string timeString;
 
     double probACKLost;
     double probNACKLost;
@@ -47,11 +52,15 @@ class Transceptor : public cSimpleModule
     simsignal_t rcvdSignal;
 
     simsignal_t bufferSignal;
+    simsignal_t timeSignal;
 
     long numSent;
     long numRcvd;
 
     long bufferLength;
+    double timePacket;
+
+    simtime_t currentTime;
 
   public:
     Transceptor();
@@ -90,6 +99,9 @@ void Transceptor::initialize()
     colaPaquetes = new cQueue("colaPaquetes");
     colaEnviando = new cQueue("colaEnviando");
 
+
+    timePaquetes = new cQueue("timePaquetes");
+
     EV << "Inicializando el Transceptor\n";
     probACKLost = par("probACKLost").doubleValue();
     probNACKLost = par("probNACKLost").doubleValue();
@@ -101,10 +113,13 @@ void Transceptor::initialize()
     sentSignal = registerSignal("sentSignal");
     rcvdSignal = registerSignal("rcvdSignal");
     bufferSignal = registerSignal("bufferSignal");
+    timeSignal = registerSignal("timeSignal");
 
     numSent = 0;
     numRcvd = 0;
     bufferLength = 0;
+    timePacket = 0;
+
 
 }
 
@@ -176,13 +191,23 @@ void Transceptor::handleMessage(cMessage *msg)
 
                 }else{
 
+                    currentTime = simTime();
+
+                    time_packet =  check_and_cast<cPacket *>( timePaquetes->get(0) ) ;
+                    timeString = string(time_packet->getName());
+
+                    timePacket = ( stod( simTime().str() ) ) - stod(timeString);
+
+                    EV << "TimePacket "<< timePacket << "\n";
 
                     numSent++;
                     EV << "AUmentamos numero de mensajes enviados"<< numSent <<"\n";
 
                     // send a signal
                     emit(sentSignal, numSent);
+                    EV << "TimeString packet WAS INSERTED IN "<< timeString << "\n";
 
+                    emit(timeSignal, timePacket);
 
                     EV << "Received: " << msg->getName() << "\n";
                     delete msg;
@@ -223,23 +248,32 @@ void Transceptor::handleMessage(cMessage *msg)
             //if( strncmp( msg->getName() , "GEN" ,3 ) == 0)
             if( arrivalGate == gate("inPacket") )
             {
-                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
 
-                /*
-                sprintf(pktname, "tic-%d", ++seq);
-                msg->setName( pktname );
-                */
+                currentTime = simTime();
+
+                EV << "Ha llegado un NUEVO PAQUETE AL Transceptor desde el INJECTOR\n";
+                EV << "Arrival Time of the Packet is "<< currentTime;
+
                 numRcvd++;
-                EV << "Aumentamos numero de mensajes Recibidos"<< numRcvd <<"\n";
+
+                cPacket *pkt = check_and_cast<cPacket *>( msg );
+
+                EV <<  "\n"<< pkt->getArrivalModule()->getParentModule()->getName() <<"AAA\n";
+                EV <<  "\n"<< pkt->getArrivalModule()->getParentModule()->getId()<<"AAA\n";
+                EV << "Aumentamos numero de mensajes Recibidos NUMRCVD "<< numRcvd <<"\n";
 
                 // receive a signal
                 emit(rcvdSignal, numRcvd);
 
-                cPacket *pkt = check_and_cast<cPacket *>( msg );
 
                 colaPaquetes->insert( check_and_cast<cObject *> (pkt) );
                 EV << "Paquete insertado en la cola colaPaquetes\n";
 
+                timeString = currentTime.str() ;
+
+                time_packet = new cPacket(timeString.data());
+
+                timePaquetes->insert( check_and_cast<cObject *> (time_packet) );
 
                 bufferLength = (long)colaPaquetes->getLength();
                 //bufferLength++;
@@ -248,7 +282,9 @@ void Transceptor::handleMessage(cMessage *msg)
                 // receive a signal
                 emit(bufferSignal, bufferLength);
 
+                timeString = currentTime.str();
 
+                EV << "TimeString "<< timeString << "\n";
 
                 if(colaPaquetes->getLength() == 1 && colaEnviando->isEmpty() )
                 {
@@ -262,7 +298,6 @@ void Transceptor::handleMessage(cMessage *msg)
 
                 }
             }else{
-
 
 
                 cPacket *pktRec=check_and_cast<cPacket *>(msg);
@@ -310,12 +345,6 @@ cPacket *Transceptor::generateNewPacket()
 {
     // Generate a message with a different name every time.
 
-    /*
-    char pktname[20];
-    sprintf(pktname, "tic-%d", ++seq);
-    cPacket *pkt = new cPacket(pktname,0,960);
-    */
-
     cPacket *pkt = check_and_cast<cPacket *>( colaPaquetes->get(0));
     EV << "Vamos a REMOVER pkt de colaPaquetes\n";
 
@@ -328,14 +357,6 @@ cPacket *Transceptor::generateNewPacket()
 
     // receive a signal
     emit(bufferSignal, bufferLength);
-
-    /*
-    char pktname[20];
-    sprintf(pktname, "tic-%d", ++seq);
-    cPacket *paquete = new cPacket(pktname,0,960);
-
-    colaPaquetes->insert( check_and_cast<cObject *> (paquete) );
-    */
 
     return pkt;
 }
