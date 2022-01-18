@@ -77,9 +77,22 @@ simple Repartidor
         @signal[rcvdSignal](type="long");
         @statistic[numRcvd](title="num received"; source="rcvdSignal"; record=vector,stats; interpolationmode=none);
         
-        @signal[timeSignal](type="double");
-        @statistic[durationNetwork](title="time in network"; source="timeSignal"; record=vector,stats; interpolationmode=none);
+        @signal[durationSignal](type="double");
+        @statistic[durationNetwork](title="time in network"; source="durationSignal"; record=vector,stats; interpolationmode=none);
+
+        @signal[hopSignal](type="long");
+        @statistic[hopNum](title="hop number in network"; source="hopSignal"; record=vector,stats; interpolationmode=none);
         
+        @signal[sourceUNOSignal](type="double");
+        @statistic[sourceUNOnum](title="packets with SOURCE GEN 1"; source="sourceUNOSignal"; record=vector,stats; interpolationmode=none);
+         
+        @signal[sourceDOSSignal](type="double");
+        @statistic[sourceDOSnum](title="packets with SOURCE GEN 2"; source="sourceDOSSignal"; record=vector,stats; interpolationmode=none);
+          
+        @signal[sourceTRESSignal](type="double");
+        @statistic[sourceTRESnum](title="packets with SOURCE GEN 3"; source="sourceTRESSignal"; record=vector,stats; interpolationmode=none);
+         
+                
     gates:
         input in[3];
         output out[3];
@@ -101,8 +114,7 @@ simple Retransmisor
 
 module Conmutador
 {
-
-    	
+	
     gates:
 		input in[3];
 		output out[3]; 
@@ -131,6 +143,12 @@ module Conmutador
 
 module ProtocolLink
 {
+ 
+ 	parameters:
+ 	    
+        @signal[timeSignal](type="double");
+        @statistic[durationLink](title="time in network"; source="timeSignal"; record=vector,stats; interpolationmode=none);    
+          
  	gates:
 
  	    input inPacket1;
@@ -138,8 +156,7 @@ module ProtocolLink
  	    
  	    input inPacket2;
  	    output outPacket2;
- 	    
- 
+
     submodules:
         
         transceptorEmisor: Transceptor {
@@ -155,16 +172,13 @@ module ProtocolLink
         inPacket1 --> transceptorEmisor.inPacket;
         inPacket2 --> transceptorReceptor.inPacket;
         
-        transceptorEmisor.out --> DatarateChannel {  datarate = default( 3000000bps); per = default(0.1); } --> transceptorReceptor.in;
-        transceptorReceptor.out --> DatarateChannel {  datarate = default( 3000000bps); per = default(0.1); } --> transceptorEmisor.in;
-        
+        transceptorEmisor.out --> DatarateChannel {  datarate = default( 3000000000bps); per = default(0); } --> transceptorReceptor.in;
+        transceptorReceptor.out --> DatarateChannel {  datarate = default( 3000000000bps); per = default(0); } --> transceptorEmisor.in;
         
         transceptorReceptor.outFinal --> outPacket1;
         transceptorEmisor.outFinal --> outPacket2;
            
 }
-
-
 
 //
 // Same as Tictoc8.

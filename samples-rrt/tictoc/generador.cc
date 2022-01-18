@@ -14,6 +14,7 @@
 #include "ibanPaquete_m.h"
 
 using namespace omnetpp;
+using namespace std;
 
 /**
  * In the previous model we just created another packet if we needed to
@@ -96,6 +97,8 @@ void Generador::handleMessage(cMessage *msg)
     int longitud = lonMedia*longExponential->draw();
     float tiempo = (1/lambda) *longExponential->draw();
 
+
+
     EV << "Longitud del PAQUETE "+ std::to_string(longitud)  +"\n";
     EV << "Tiempo del PAQUETE "+ std::to_string(tiempo)  +"\n";
 
@@ -105,20 +108,39 @@ void Generador::handleMessage(cMessage *msg)
     scheduleAt(simTime() + tiempo, packet);
 
 }
-
+string convertToString(char* a, int size)
+{
+    int i;
+    string s = "";
+    for (i = 0; i < size; i++) {
+        s = s + a[i];
+    }
+    return s;
+}
 cPacket *Generador::generateNewPacket()
 {
     // Generate a message with a different name every time.
 
     char pktname[20];
-    sprintf(pktname, "GEN-tic-%d", ++seq);
+
+    string strModuleName;
+
+    strModuleName.assign(getName());
+
+    string strModuleNum = strModuleName.substr( strModuleName.length() - 1 );
+
+    EV << "GENERADOR NUMERO " << strModuleNum << endl;
+
+    sprintf(pktname, "GEN-%d-tic-%d", stoi(strModuleNum) , ++seq);
 
     IbanPaquete *ibpkt = new IbanPaquete(pktname,0);
 
     ibpkt->setInitTime( (stod( simTime().str()) ) );
-    ibpkt->setBitLength(960);
 
-    EV << " Initial Time" << ibpkt->getInitTime() << endl;
+    ibpkt->setBitLength(960);
+    ibpkt->setSrc( stoi(strModuleNum) );
+
+    EV << " GENERADOR Initial Time" << ibpkt->getInitTime() << endl;
 
     cPacket *pkt = check_and_cast<cPacket *>(ibpkt);
 

@@ -20,4 +20,7 @@ packet IbanPaquete {
 
     double initTime;
     double nodeInitTime;
+    long hopNum = 0;
+    int src;
+    
 }

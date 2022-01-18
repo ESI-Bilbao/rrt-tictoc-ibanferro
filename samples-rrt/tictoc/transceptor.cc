@@ -13,6 +13,7 @@
 #include <string.h>
 #include <omnetpp.h>
 
+#include "ibanPaquete_m.h"
 
 using namespace omnetpp;
 using namespace std;
@@ -207,7 +208,7 @@ void Transceptor::handleMessage(cMessage *msg)
                     emit(sentSignal, numSent);
                     EV << "TimeString packet WAS INSERTED IN "<< timeString << "\n";
 
-                    emit(timeSignal, timePacket);
+
 
                     EV << "Received: " << msg->getName() << "\n";
                     delete msg;
@@ -265,6 +266,9 @@ void Transceptor::handleMessage(cMessage *msg)
                 // receive a signal
                 emit(rcvdSignal, numRcvd);
 
+                IbanPaquete * ibpkt = check_and_cast<IbanPaquete *>(pkt);
+                ibpkt->setNodeInitTime( ( stod( simTime().str() ) ) );
+                pkt = check_and_cast<cPacket *>(ibpkt);
 
                 colaPaquetes->insert( check_and_cast<cObject *> (pkt) );
                 EV << "Paquete insertado en la cola colaPaquetes\n";
@@ -324,8 +328,26 @@ void Transceptor::handleMessage(cMessage *msg)
                     }
                     else{   // Simula el caso en que el mensaje ha llegado y NO tiene ERRORES
                         EV << msg << " received, sending back an ACK.\n";
-                        send( msg, "outFinal"); //Se envia un ACK
 
+                        IbanPaquete * ibpkt = check_and_cast<IbanPaquete *>(msg);
+
+                        if(ibpkt->getNodeInitTime() != 0)
+                        {
+
+                            double durationLink = ( stod( simTime().str() ) ) - ibpkt->getNodeInitTime() ;
+
+                            EV << "NODE INIT TIME  " << ibpkt->getNodeInitTime() << endl;
+                            EV << "Duration In Network  TRANSCEPTOR Initial Time   " << ibpkt->getInitTime() << endl;
+                            EV << "DURATIONLINK  " << durationLink << endl;
+
+                            emit(timeSignal, durationLink);
+
+                            ibpkt->setHopNum( ibpkt->getHopNum() + 1);
+
+                        }
+
+                        cMessage * msg = check_and_cast<cMessage *>(ibpkt);
+                        send( msg, "outFinal"); //Se envia un ACK
 
                         ack_packet = new cPacket("ack");
                         ack_packet->setBitLength(48); //Los Bits de un mensaje NACK/ACK

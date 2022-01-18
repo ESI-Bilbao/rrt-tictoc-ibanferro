@@ -183,6 +183,8 @@ IbanPaquete::IbanPaquete(const char *name, short kind) : ::omnetpp::cPacket(name
 {
     this->initTime = 0;
     this->nodeInitTime = 0;
+    this->hopNum = 0;
+    this->src = 0;
 }
 
 IbanPaquete::IbanPaquete(const IbanPaquete& other) : ::omnetpp::cPacket(other)
@@ -206,6 +208,8 @@ void IbanPaquete::copy(const IbanPaquete& other)
 {
     this->initTime = other.initTime;
     this->nodeInitTime = other.nodeInitTime;
+    this->hopNum = other.hopNum;
+    this->src = other.src;
 }
 
 void IbanPaquete::parsimPack(omnetpp::cCommBuffer *b) const
@@ -213,6 +217,8 @@ void IbanPaquete::parsimPack(omnetpp::cCommBuffer *b) const
     ::omnetpp::cPacket::parsimPack(b);
     doParsimPacking(b,this->initTime);
     doParsimPacking(b,this->nodeInitTime);
+    doParsimPacking(b,this->hopNum);
+    doParsimPacking(b,this->src);
 }
 
 void IbanPaquete::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -220,6 +226,8 @@ void IbanPaquete::parsimUnpack(omnetpp::cCommBuffer *b)
     ::omnetpp::cPacket::parsimUnpack(b);
     doParsimUnpacking(b,this->initTime);
     doParsimUnpacking(b,this->nodeInitTime);
+    doParsimUnpacking(b,this->hopNum);
+    doParsimUnpacking(b,this->src);
 }
 
 double IbanPaquete::getInitTime() const
@@ -240,6 +248,26 @@ double IbanPaquete::getNodeInitTime() const
 void IbanPaquete::setNodeInitTime(double nodeInitTime)
 {
     this->nodeInitTime = nodeInitTime;
+}
+
+long IbanPaquete::getHopNum() const
+{
+    return this->hopNum;
+}
+
+void IbanPaquete::setHopNum(long hopNum)
+{
+    this->hopNum = hopNum;
+}
+
+int IbanPaquete::getSrc() const
+{
+    return this->src;
+}
+
+void IbanPaquete::setSrc(int src)
+{
+    this->src = src;
 }
 
 class IbanPaqueteDescriptor : public omnetpp::cClassDescriptor
@@ -307,7 +335,7 @@ const char *IbanPaqueteDescriptor::getProperty(const char *propertyname) const
 int IbanPaqueteDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount() : 2;
+    return basedesc ? 4+basedesc->getFieldCount() : 4;
 }
 
 unsigned int IbanPaqueteDescriptor::getFieldTypeFlags(int field) const
@@ -321,8 +349,10 @@ unsigned int IbanPaqueteDescriptor::getFieldTypeFlags(int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *IbanPaqueteDescriptor::getFieldName(int field) const
@@ -336,8 +366,10 @@ const char *IbanPaqueteDescriptor::getFieldName(int field) const
     static const char *fieldNames[] = {
         "initTime",
         "nodeInitTime",
+        "hopNum",
+        "src",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
 }
 
 int IbanPaqueteDescriptor::findField(const char *fieldName) const
@@ -346,6 +378,8 @@ int IbanPaqueteDescriptor::findField(const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='i' && strcmp(fieldName, "initTime")==0) return base+0;
     if (fieldName[0]=='n' && strcmp(fieldName, "nodeInitTime")==0) return base+1;
+    if (fieldName[0]=='h' && strcmp(fieldName, "hopNum")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "src")==0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -360,8 +394,10 @@ const char *IbanPaqueteDescriptor::getFieldTypeString(int field) const
     static const char *fieldTypeStrings[] = {
         "double",
         "double",
+        "long",
+        "int",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **IbanPaqueteDescriptor::getFieldPropertyNames(int field) const
@@ -430,6 +466,8 @@ std::string IbanPaqueteDescriptor::getFieldValueAsString(void *object, int field
     switch (field) {
         case 0: return double2string(pp->getInitTime());
         case 1: return double2string(pp->getNodeInitTime());
+        case 2: return long2string(pp->getHopNum());
+        case 3: return long2string(pp->getSrc());
         default: return "";
     }
 }
@@ -446,6 +484,8 @@ bool IbanPaqueteDescriptor::setFieldValueAsString(void *object, int field, int i
     switch (field) {
         case 0: pp->setInitTime(string2double(value)); return true;
         case 1: pp->setNodeInitTime(string2double(value)); return true;
+        case 2: pp->setHopNum(string2long(value)); return true;
+        case 3: pp->setSrc(string2long(value)); return true;
         default: return false;
     }
 }

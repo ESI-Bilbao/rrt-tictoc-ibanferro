@@ -28,6 +28,9 @@
  * {
  *     double initTime;
  *     double nodeInitTime;
+ *     long hopNum = 0;
+ *     int src;
+ * 
  * }
  * </pre>
  */
@@ -36,6 +39,8 @@ class IbanPaquete : public ::omnetpp::cPacket
   protected:
     double initTime;
     double nodeInitTime;
+    long hopNum;
+    int src;
 
   private:
     void copy(const IbanPaquete& other);
@@ -58,6 +63,10 @@ class IbanPaquete : public ::omnetpp::cPacket
     virtual void setInitTime(double initTime);
     virtual double getNodeInitTime() const;
     virtual void setNodeInitTime(double nodeInitTime);
+    virtual long getHopNum() const;
+    virtual void setHopNum(long hopNum);
+    virtual int getSrc() const;
+    virtual void setSrc(int src);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const IbanPaquete& obj) {obj.parsimPack(b);}

@@ -5,9 +5,6 @@
  *      Author: ?
  */
 
-
-
-
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -19,10 +16,8 @@
 #include "tictoc16_m.h"
 #include "ibanPaquete_m.h"
 
-
 using namespace omnetpp;
 using namespace std;
-
 
 class Repartidor : public cSimpleModule
 {
@@ -46,20 +41,25 @@ class Repartidor : public cSimpleModule
 
     float probs[2];
 
-
     simsignal_t sentSignal;
     simsignal_t rcvdSignal;
 
+    simsignal_t durationSignal;
+    simsignal_t hopSignal;
 
-    simsignal_t timeSignal;
+    simsignal_t sourceUNOSignal;
+    simsignal_t sourceDOSSignal;
+    simsignal_t sourceTRESSignal;
+
+    double sourceUNOnum;
+    double sourceDOSnum;
+    double sourceTRESnum;
 
     long numSent;
     long numRcvd;
 
-
     long porPuertaUno;
     long porPuertaDos;
-
 
   protected:
     virtual void initialize() override;
@@ -111,7 +111,6 @@ void Repartidor::initialize()
     EV << " PROBABILIDADES "<< probs[0]<<"\n";
     EV << "PROBABILIDADES SIZE LENGTH "<< sizeof(probs)/sizeof(int) <<"\n";
 
-
     sentSignal = registerSignal("sentSignal");
     rcvdSignal = registerSignal("rcvdSignal");
 
@@ -121,9 +120,16 @@ void Repartidor::initialize()
     porPuertaUno = 0;
     porPuertaDos = 0;
 
+    durationSignal = registerSignal("durationSignal");
+    hopSignal = registerSignal("hopSignal");
 
-    timeSignal = registerSignal("timeSignal");
+    sourceUNOSignal = registerSignal("sourceUNOSignal");
+    sourceDOSSignal = registerSignal("sourceDOSSignal");
+    sourceTRESSignal = registerSignal("sourceTRESSignal");
 
+    sourceUNOnum = 0;
+    sourceDOSnum = 0;
+    sourceTRESnum = 0;
 
 }
 
@@ -131,13 +137,11 @@ void Repartidor::handleMessage(cMessage *msg)
 {
     cPacket *pkt=check_and_cast<cPacket *>(msg);
 
-
         numRcvd++;
         EV << "Aumentamos numero de mensajes Recibidos"<< numRcvd <<"\n";
 
         // receive a signal
         emit(rcvdSignal, numRcvd);
-
 
         EV << "Repartidor\n";
         EV << "PRUEBA DE A VER SI SE LEE EL PARAMETRO STRING\n";
@@ -154,22 +158,48 @@ void Repartidor::handleMessage(cMessage *msg)
             EV << pkt->getSenderModule()->getParentModule()->getName() << "\n";
             EV << "El anterior print deberia ser el nombre del modulo \n";
 
-            //delete pkt;
-
             IbanPaquete *ibpkt = check_and_cast<IbanPaquete *>(msg);
-            double durationNetwork = ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
 
-            emit(timeSignal, durationNetwork);
+            if( ibpkt->getInitTime() != 0 )
+            {
 
-            EV << "DURATION in Network" << durationNetwork << endl;
+                double durationNetwork = ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
+                emit(durationSignal, durationNetwork);
+                EV << "Duration In Network  GENERADOR Initial Time    " << ibpkt->getInitTime() << endl;
+                EV << "Duration In LINK  LINK Duration Time    " << ibpkt->getNodeInitTime() << endl;
+                EV << "DURATION in Network" << durationNetwork << endl;
+
+                long hopNum = ibpkt->getHopNum();
+                EV << " CONMUTADOR HOPNUM  "<< hopNum << endl;
+                emit(hopSignal, hopNum);
+
+
+                int srcNumber = ibpkt->getSrc();
+
+                if(srcNumber == 1)
+                {
+                    sourceUNOnum =  ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
+                    emit(sourceUNOSignal, sourceUNOnum);
+
+                }else if(srcNumber == 2)
+                {
+                    sourceDOSnum =  ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
+                    emit(sourceDOSSignal, sourceDOSnum);
+
+                }else if(srcNumber == 3)
+                {
+                    sourceTRESnum =  ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
+                    emit(sourceTRESSignal, sourceTRESnum);
+
+                }
+
+            }
 
             delete msg;
-
-
         }else{
 
             EV << "Este NO es el Conmutador 4\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador4");
-            EV << "Este NO es el Conmutador 3\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador3");
+            EV << "NI Este NO es el Conmutador 3\n"<< strcmp( pkt->getSenderModule()->getParentModule()->getName(), "conmutador3");
 
             EV << pkt->getSenderModule()->getParentModule()->getName() << "\n";
             EV << "El anterior print deberia ser el nombre del modulo \n";
