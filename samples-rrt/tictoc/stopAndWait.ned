@@ -77,6 +77,9 @@ simple Repartidor
         @signal[rcvdSignal](type="long");
         @statistic[numRcvd](title="num received"; source="rcvdSignal"; record=vector,stats; interpolationmode=none);
         
+        @signal[timeSignal](type="double");
+        @statistic[durationNetwork](title="time in network"; source="timeSignal"; record=vector,stats; interpolationmode=none);
+        
     gates:
         input in[3];
         output out[3];

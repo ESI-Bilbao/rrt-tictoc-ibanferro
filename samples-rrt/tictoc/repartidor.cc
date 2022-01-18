@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "tictoc16_m.h"
+#include "ibanPaquete_m.h"
 
 
 using namespace omnetpp;
@@ -48,6 +49,9 @@ class Repartidor : public cSimpleModule
 
     simsignal_t sentSignal;
     simsignal_t rcvdSignal;
+
+
+    simsignal_t timeSignal;
 
     long numSent;
     long numRcvd;
@@ -117,34 +121,22 @@ void Repartidor::initialize()
     porPuertaUno = 0;
     porPuertaDos = 0;
 
+
+    timeSignal = registerSignal("timeSignal");
+
+
 }
 
 void Repartidor::handleMessage(cMessage *msg)
 {
     cPacket *pkt=check_and_cast<cPacket *>(msg);
 
-/*
 
-    TicTocMsg16 *ttmsg = check_and_cast<TicTocMsg16 *>(msg);
-
-
-    if (ttmsg->getDestination() == getIndex()) {
-        // Message arrived
-        int hopcount = ttmsg->getHopCount();
-        // send a signal
-        emit(sentSignal, hopcount);
-
-        EV << "Message " << ttmsg << " arrived after " << hopcount << " hops.\n";
-
-    }
-
-*/
         numRcvd++;
         EV << "Aumentamos numero de mensajes Recibidos"<< numRcvd <<"\n";
 
         // receive a signal
         emit(rcvdSignal, numRcvd);
-
 
 
         EV << "Repartidor\n";
@@ -163,6 +155,13 @@ void Repartidor::handleMessage(cMessage *msg)
             EV << "El anterior print deberia ser el nombre del modulo \n";
 
             //delete pkt;
+
+            IbanPaquete *ibpkt = check_and_cast<IbanPaquete *>(msg);
+            double durationNetwork = ( stod( simTime().str() ) ) - ibpkt->getInitTime() ;
+
+            emit(timeSignal, durationNetwork);
+
+            EV << "DURATION in Network" << durationNetwork << endl;
 
             delete msg;
 

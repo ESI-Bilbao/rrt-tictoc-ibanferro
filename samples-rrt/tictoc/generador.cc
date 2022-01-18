@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
-
+#include "ibanPaquete_m.h"
 
 using namespace omnetpp;
 
@@ -112,7 +112,17 @@ cPacket *Generador::generateNewPacket()
 
     char pktname[20];
     sprintf(pktname, "GEN-tic-%d", ++seq);
-    cPacket *pkt = new cPacket(pktname,0,960);
+
+    IbanPaquete *ibpkt = new IbanPaquete(pktname,0);
+
+    ibpkt->setInitTime( (stod( simTime().str()) ) );
+    ibpkt->setBitLength(960);
+
+    EV << " Initial Time" << ibpkt->getInitTime() << endl;
+
+    cPacket *pkt = check_and_cast<cPacket *>(ibpkt);
+
+
 
     return pkt;
 }

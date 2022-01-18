@@ -56,6 +56,7 @@ OBJS = \
     $O/txc8.o \
     $O/txc9.o \
     $O/txcSaW.o \
+    $O/ibanPaquete_m.o \
     $O/tictoc13_m.o \
     $O/tictoc14_m.o \
     $O/tictoc15_m.o \
@@ -65,6 +66,7 @@ OBJS = \
 
 # Message files
 MSGFILES = \
+    ibanPaquete.msg \
     tictoc13.msg \
     tictoc14.msg \
     tictoc15.msg \
