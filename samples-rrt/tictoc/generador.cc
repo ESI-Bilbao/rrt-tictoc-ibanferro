@@ -137,7 +137,7 @@ cPacket *Generador::generateNewPacket()
 
     ibpkt->setInitTime( (stod( simTime().str()) ) );
 
-    ibpkt->setBitLength(960);
+    ibpkt->setBitLength(3200);
     ibpkt->setSrc( stoi(strModuleNum) );
 
     EV << " GENERADOR Initial Time" << ibpkt->getInitTime() << endl;

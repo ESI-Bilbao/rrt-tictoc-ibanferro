@@ -172,8 +172,8 @@ module ProtocolLink
         inPacket1 --> transceptorEmisor.inPacket;
         inPacket2 --> transceptorReceptor.inPacket;
         
-        transceptorEmisor.out --> DatarateChannel {  datarate = default( 3000000000bps); per = default(0); } --> transceptorReceptor.in;
-        transceptorReceptor.out --> DatarateChannel {  datarate = default( 3000000000bps); per = default(0); } --> transceptorEmisor.in;
+        transceptorEmisor.out --> DatarateChannel {  datarate = default( 9600000000bps); per = default(0.001); } --> transceptorReceptor.in;
+        transceptorReceptor.out --> DatarateChannel {  datarate = default( 9600000000bps); per = default(0.001); } --> transceptorEmisor.in;
         
         transceptorReceptor.outFinal --> outPacket1;
         transceptorEmisor.outFinal --> outPacket2;
